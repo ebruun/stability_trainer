@@ -15,7 +15,6 @@ from compas_rbe.equilibrium import compute_interface_forces_cvx
 
 def input_paths(name, folder):
 
-
 	root = os.path.dirname(os.path.abspath(__file__))
 
 	analysis_folder = os.path.join(root, folder)
@@ -40,7 +39,7 @@ def output_path(input_path):
 def calculate(FILE_IN, plot_flag):
 	
 	for file in FILE_IN:
-		print("Calculating",file)
+		#print("Calculating",file)
 		assembly = Assembly.from_json(file)
 
 		# ==============================================================================
