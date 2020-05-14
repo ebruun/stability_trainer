@@ -1,4 +1,5 @@
 *.json
 *.ipynb_checkpoints
 *3dmbak
+*.DS_Store
 /analysis

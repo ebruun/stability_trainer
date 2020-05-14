@@ -37,8 +37,8 @@ print("The data lies here =>", root_dir)
 show = 1
 
 p_val = 0.2 # %of train samples used to validate
-DIM = [28,28]
-EPOCHS = 30
+DIM = [8,88]
+EPOCHS = 25
 LEARNING_RATE = 0.05
 
 BATCH_SIZE = {
@@ -296,14 +296,9 @@ with torch.no_grad():
 		y_pred_list.append(y_pred.cpu().numpy())
 		y_true_list.append(y.cpu().numpy())
 
-print(y_pred_list)
-print(y_true_list)
 
 y_pred_list = np.concatenate(y_pred_list).ravel()
 y_true_list = np.concatenate(y_true_list).ravel()
-
-print(y_pred_list)
-print(y_true_list)
 
 print(classification_report(y_true_list, y_pred_list))
 print(confusion_matrix(y_true_list, y_pred_list))
