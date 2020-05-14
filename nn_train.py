@@ -37,14 +37,14 @@ print("The data lies here =>", root_dir)
 show = 1
 
 p_val = 0.2 # %of train samples used to validate
-DIM = [8,88]
-EPOCHS = 25
+DIM = [80,80]
+EPOCHS = 10
 LEARNING_RATE = 0.05
 
 BATCH_SIZE = {
 	"train": 100,
-	"val": 2,
-	"test": 2}
+	"val": 50,
+	"test": 50}
 
 accuracy_stats = {
 	'train': [],
@@ -95,16 +95,14 @@ train_loader = DataLoader(dataset=train_dataset, shuffle=False, batch_size=BATCH
 val_loader = DataLoader(dataset=train_dataset, shuffle=False, batch_size=BATCH_SIZE["val"], sampler=val_sampler)
 test_loader = DataLoader(dataset=test_dataset, shuffle=True, batch_size=BATCH_SIZE["test"])
 
-print(train_dataset)
-
 
 #### INPUT DATA PLOTS ####
-if not show:
+if show:
 
 	idx2class = {v: k for k, v in train_dataset.class_to_idx.items()}
 
-	print("---PRINT DATASET BREAKDOWN")
-	helpers.plot_from_dict2(train_dataset,test_dataset,idx2class)
+	#print("---PRINT DATASET BREAKDOWN")
+	#helpers.plot_from_dict2(train_dataset,test_dataset,idx2class)
 	
 	print("TRAINING DATA")
 	inputs, labels = next(iter(train_loader))

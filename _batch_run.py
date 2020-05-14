@@ -2,7 +2,7 @@ import os
 import sys
 from math import pi
 
-"""
+
 from compas.geometry import Rotation
 
 from compas_assembly.datastructures import Assembly
@@ -10,7 +10,7 @@ from compas_assembly.datastructures import assembly_interfaces_numpy
 from compas_assembly.plotter import AssemblyPlotter
 
 from compas_rbe.equilibrium import compute_interface_forces_cvx
-"""
+
 
 
 def input_paths(name, folder, idx_start, idx_end):
