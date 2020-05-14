@@ -2,7 +2,7 @@ import os
 import sys
 from math import pi
 
-
+"""
 from compas.geometry import Rotation
 
 from compas_assembly.datastructures import Assembly
@@ -10,10 +10,10 @@ from compas_assembly.datastructures import assembly_interfaces_numpy
 from compas_assembly.plotter import AssemblyPlotter
 
 from compas_rbe.equilibrium import compute_interface_forces_cvx
+"""
 
 
-
-def input_paths(name, folder):
+def input_paths(name, folder, idx_start, idx_end):
 
 	root = os.path.dirname(os.path.abspath(__file__))
 
@@ -24,9 +24,16 @@ def input_paths(name, folder):
 	run_files = [i for i in all_files if i.startswith(name)]
 	run_files = [i for i in run_files if not i.endswith("done.json")]
 
+	run_files = [i for i in run_files if int(os.path.splitext(i)[0].split(name)[1]) in range(idx_start,idx_end+1)]
+	#print(run_files[0])
+	#print(run_files[1])
+	#print(len(run_files))
+
 	FILES_IN = [os.path.join(analysis_folder, file) for file in run_files]
+	#print(FILES_IN)
 
 	return FILES_IN
+
 
 def output_path(input_path):
 	head, tail = os.path.split(input_path)
@@ -45,13 +52,11 @@ def calculate(FILE_IN, plot_flag):
 		# ==============================================================================
 		# Identify interfaces
 		# ==============================================================================
-
 		assembly_interfaces_numpy(assembly, tmax=0.02)
 
 		# ==============================================================================
 		# Equilibrium
 		# ==============================================================================
-
 		compute_interface_forces_cvx(assembly, solver='CPLEX', verbose=False)
 		#compute_interface_forces_cvx(assembly, solver='ECOS', verbose=True)
 
@@ -74,12 +79,20 @@ def calculate(FILE_IN, plot_flag):
 
 if __name__ == "__main__":
 
+	#This is the folder in the directory of this program it will look in
 	folder = "analysis"
 
+	#The base name of the analysis files
 	name = sys.argv[1]
-	plot_flag = int(sys.argv[2])
 
-	fs_in = input_paths(name, folder)
+	#To plot the tower (0 = off, 1 = on)
+	plot_flag = int(sys.argv[4])
+
+	#The range of files to calculate
+	idx_start = int(sys.argv[2])
+	idx_end = int(sys.argv[3])
+
+	fs_in = input_paths(name, folder, idx_start, idx_end)
 	#print(fs_in)
 
 	calculate(fs_in,plot_flag)
