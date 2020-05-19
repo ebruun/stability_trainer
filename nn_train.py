@@ -34,17 +34,17 @@ root_dir = "./images/"
 print("The data lies here =>", root_dir)
 
 
-show = 1
+show = 0
 
-p_val = 0.2 # %of train samples used to validate
-DIM = [80,80]
-EPOCHS = 10
-LEARNING_RATE = 0.05
+p_val = 0.1 # %of train samples used to validate
+DIM = [20,20]
+EPOCHS = 15
+LEARNING_RATE = 0.010 *(128/256)*2
 
 BATCH_SIZE = {
-	"train": 100,
-	"val": 50,
-	"test": 50}
+	"train": 128,
+	"val": 64,
+	"test": 64}
 
 accuracy_stats = {
 	'train': [],
@@ -62,19 +62,22 @@ image_transforms = {
 	transforms.Grayscale(num_output_channels=1),
 	transforms.Resize((DIM[0],DIM[1])),
 	transforms.ToTensor(),
-	transforms.Normalize(mean=0.8717,std=0.2662)
+	transforms.Normalize(mean=0.8916,std=0.2184)
 	]),
 	"test": transforms.Compose([
 	transforms.Grayscale(num_output_channels=1),
 	transforms.Resize((DIM[0],DIM[1])),
 	transforms.ToTensor(),
-	transforms.Normalize(mean=0.8717,std=0.2662)
+	transforms.Normalize(mean=0.9012,std=0.1943)
 	])
 }
 
 #### Initialize TRAIN/VAL/TEST Datasets ####
 train_dataset = datasets.ImageFolder(root = root_dir + "train",transform = image_transforms["train"])
 test_dataset = datasets.ImageFolder(root = root_dir + "test", transform = image_transforms["test"])
+
+print("Train Size:", len(train_dataset))
+print("Test Size:", len(test_dataset))
 
 
 #Get Train and Validation Samples
@@ -91,19 +94,29 @@ val_sampler = SubsetRandomSampler(val_idx)
 
 
 #### DATA LOADERS ####
+#subsetsampler already shuffles the data each epoch
 train_loader = DataLoader(dataset=train_dataset, shuffle=False, batch_size=BATCH_SIZE["train"], sampler=train_sampler, num_workers=4)
 val_loader = DataLoader(dataset=train_dataset, shuffle=False, batch_size=BATCH_SIZE["val"], sampler=val_sampler)
-test_loader = DataLoader(dataset=test_dataset, shuffle=True, batch_size=BATCH_SIZE["test"])
+test_loader = DataLoader(dataset=test_dataset, shuffle=False, batch_size=BATCH_SIZE["test"])
+
+#If calculating, turn off normalization transform
+data_mean, data_std = helpers.online_mean_and_sd(train_loader) 
+print(data_mean, data_std)
+
+data_mean, data_std = helpers.online_mean_and_sd(val_loader)
+print(data_mean, data_std)
+
+data_mean, data_std = helpers.online_mean_and_sd(test_loader)
+print(data_mean, data_std)
 
 
 #### INPUT DATA PLOTS ####
+idx2class = {v: k for k, v in test_dataset.class_to_idx.items()}
 if show:
-
-	idx2class = {v: k for k, v in train_dataset.class_to_idx.items()}
 
 	#print("---PRINT DATASET BREAKDOWN")
 	#helpers.plot_from_dict2(train_dataset,test_dataset,idx2class)
-	
+
 	print("TRAINING DATA")
 	inputs, labels = next(iter(train_loader))
 	helpers.plot_image(DIM,inputs[0],idx2class[labels[0].item()])
@@ -118,6 +131,7 @@ if show:
 	inputs, labels = next(iter(test_loader))
 	helpers.plot_image(DIM,inputs[0],idx2class[labels[0].item()])
 	helpers.plot_image_grid(DIM,BATCH_SIZE["test"], inputs, [idx2class[x.item()] for x in labels])
+
 
 
 #### NETWORK ARCHITECTURE ####
@@ -135,12 +149,25 @@ class Net(nn.Module):
 		self.size_linear = 64*(dim)**2
 		self.fc1 = nn.Linear(self.size_linear, 512)
 		self.fc2 = nn.Linear(512, 2)
-   
+
+		#20% Dropout
+		self.dropout = nn.Dropout(p=0.2)
+	
+	"""
 	def forward(self, x):
 		x = self.pool1(F.relu(self.conv1(x))) 
 		x = self.pool2(F.relu(self.conv2(x)))
 		x = x.view(-1, self.size_linear) 
-		x = self.fc1(x)
+		x = F.relu(self.fc1(x))
+		x = self.fc2(x) 
+		return x
+	"""
+
+	def forward(self, x):
+		x = self.dropout(self.pool1(F.relu(self.conv1(x))))
+		x = self.dropout(self.pool2(F.relu(self.conv2(x))))
+		x = x.view(-1, self.size_linear) 
+		x = self.dropout(F.relu(self.fc1(x)))
 		x = self.fc2(x) 
 		return x
 
@@ -160,7 +187,8 @@ class Trainer():
 			epoch_acc = 0.0
 			epoch_steps = 0
 
-			for data in train_loader:
+			net.train()
+			for ii, data in enumerate(train_loader):
 				# Moving this batch to GPU
 				# Note that X has shape (batch_size, number of channels, height, width)
 				# which is equal to (256,1,28,28) since our default batch_size = 256 and 
@@ -196,9 +224,7 @@ class Trainer():
 				val_epoch_acc = 0.0
 				val_epoch_steps = 0
 
-
 				for val_data in val_loader:
-
 					val_X = val_data[0].to(device)
 					val_y = val_data[1].to(device)
 
@@ -211,6 +237,8 @@ class Trainer():
 					val_epoch_acc += val_acc.item()
 
 					val_epoch_steps += 1
+
+
 			
 			loss_stats['train'].append(epoch_loss/epoch_steps)
 			loss_stats['val'].append(val_epoch_loss/val_epoch_steps)
@@ -229,6 +257,9 @@ class Trainer():
 dim_after_pool = int(DIM[0]/2/2)
 
 net = Net(dim_after_pool)
+
+print(net)
+
 a = net.to(device)
 
 opt = optim.SGD(net.parameters(), lr=LEARNING_RATE, momentum=0.9)
@@ -256,8 +287,8 @@ print("Training elapse time:", timeit.default_timer() - starttime)
 
 
 #### OUTPUT DATA PLOTS ####
-if show:
-	helpers.plot_loss_accuracy_epoch(losses,accuracy)
+#if show:
+helpers.plot_loss_accuracy_epoch(losses,accuracy)
 
 
 

@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import math
 import numpy as np
 
+import torch
+
 
 def get_class_distribution(dataset_obj,idx2class):
 	count_dict = {k:0 for k,v in dataset_obj.class_to_idx.items()} #initialize count
@@ -80,7 +82,27 @@ def plot_loss_accuracy_epoch(loss_stats,accuracy_stats):
 	plt.show()
 
 
+def online_mean_and_sd(loader):
+    """Compute the mean and sd in an online fashion
 
+        Var[x] = E[X^2] - E^2[X]
+    """
+    cnt = 0
+    fst_moment = torch.empty(3)
+    snd_moment = torch.empty(3)
+
+    for images, _ in loader:
+
+        b, c, h, w = images.shape
+        nb_pixels = b * h * w
+        sum_ = torch.sum(images, dim=[0, 2, 3])
+        sum_of_square = torch.sum(images ** 2, dim=[0, 2, 3])
+        fst_moment = (cnt * fst_moment + sum_) / (cnt + nb_pixels)
+        snd_moment = (cnt * snd_moment + sum_of_square) / (cnt + nb_pixels)
+
+        cnt += nb_pixels
+
+    return fst_moment, torch.sqrt(snd_moment - fst_moment ** 2)
 
 
 

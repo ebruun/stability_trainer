@@ -2,4 +2,6 @@
 *.ipynb_checkpoints
 *3dmbak
 *.DS_Store
+*.db
+saved_model
 /analysis
