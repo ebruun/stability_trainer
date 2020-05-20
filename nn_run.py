@@ -37,9 +37,11 @@ def evaluation(prms,data, name, model = False):
 if __name__ == "__main__":
 
 	prms = nn_input.Input()
-	data = nn_dataset.Data(prms)
+	#data = nn_dataset.Data(prms)
 	#data = nn_dataset.Data(prms, plot_image = True)
+	#data = nn_dataset.Data(prms, find_normalize=True)
 
+	exit()
 	name = "model3"
 	trained_model = training(prms,data, name)
 

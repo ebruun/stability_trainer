@@ -39,13 +39,13 @@ class Input():
 			transforms.Grayscale(num_output_channels=1),
 			transforms.Resize((self.DIM[0],self.DIM[1])),
 			transforms.ToTensor(),
-			transforms.Normalize(mean=0.8916,std=0.2184)
+			transforms.Normalize(mean=0.8919,std=0.2316)
 			]),
 			"test": transforms.Compose([
 			transforms.Grayscale(num_output_channels=1),
 			transforms.Resize((self.DIM[0],self.DIM[1])),
 			transforms.ToTensor(),
-			transforms.Normalize(mean=0.9012,std=0.1943)
+			transforms.Normalize(mean=0.9016,std=0.2083)
 			])
 		}
 
