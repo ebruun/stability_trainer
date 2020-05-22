@@ -3,6 +3,8 @@ import numpy as np
 
 import torch
 
+import helpers
+
 from sklearn.metrics import classification_report, confusion_matrix
 
 class Evaluation():
@@ -34,6 +36,8 @@ class Evaluation():
 				output = torch.log_softmax(output, dim=1)
 				_, y_pred = torch.max(output, dim = 1)
 
+				self.plot_incorrect(X,y,y_pred,output)
+
 				y_pred_list.append(y_pred.cpu().numpy())
 				y_true_list.append(y.cpu().numpy())
 
@@ -43,3 +47,21 @@ class Evaluation():
 
 		print(classification_report(y_true_list, y_pred_list))
 		print(confusion_matrix(y_true_list, y_pred_list))
+
+
+	def plot_incorrect(self,X,y,y_pred,output):
+		idx_wrong = (y != y_pred).nonzero()
+
+		output = torch.exp(output)
+		name = []
+		for idx in idx_wrong:
+			if y[idx] == 0:
+				num = output[idx][0][1]
+				name.append('IS stable --> BUT {:.0f}% unstable'.format(100*num))
+			else:
+				num = output[idx][0][0]
+				name.append('IS unstable --> BUT {:.0f}% stable'.format(100*num))
+
+		#helpers.plot_image(self.p.DIM,X[idx_wrong[0]],name[0])
+		helpers.plot_image_grid(self.p.DIM,len(idx_wrong), X[idx_wrong], name)
+

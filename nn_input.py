@@ -22,9 +22,9 @@ class Input():
 
 		self.VAL_SPLIT = 0.1 # %of train samples used to validate
 		self.DROP = 0.4 # %to dropout
-		self.DIM = [32,32]
+		self.DIM = [64,64]
 		self.EPOCHS = 25
-		self.LEARNING_RATE = 0.010 *(128/256)*2
+		self.LEARNING_RATE = 0.03
 		self.MOM = 0.9
 
 		self.BATCH_SIZE = {

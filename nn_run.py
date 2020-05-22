@@ -1,5 +1,7 @@
 import timeit
 
+import pandas as pd
+
 import helpers
 import nn_model
 import nn_trainer
@@ -18,12 +20,12 @@ def training(prms,data, name):
 	losses, accuracy = trainer.train(data.loader_train, data.loader_val)
 	print("Training elapse time:", timeit.default_timer() - starttime)
 
-	trainer.plot_training(losses, accuracy)
+	#trainer.plot_training(losses, accuracy)
 	trainer.save_model(name)
 
-	return model
+	return model, losses, accuracy
 
-def evaluation(prms,data, name, model = False):
+def evaluation(prms,data, name = False, model = False):
 	if model:
 		evaluation = nn_evaluation.Evaluation(model,prms)
 	else:
@@ -37,16 +39,25 @@ def evaluation(prms,data, name, model = False):
 if __name__ == "__main__":
 
 	prms = nn_input.Input()
+	data = nn_dataset.Data(prms, plot_dist=True)
+
 	#data = nn_dataset.Data(prms)
 	#data = nn_dataset.Data(prms, plot_image = True)
 	#data = nn_dataset.Data(prms, find_normalize=True)
 
-	exit()
-	name = "model3"
-	trained_model = training(prms,data, name)
+	runs = [[64,64]]
 
-	evaluation(prms,data, name, model = trained_model)
-	#evaluation(prms,data, name)
+	for run in runs:
+
+		name = "model_dim_" + str(run)
+
+		#trained_model, l, a = training(prms,data, name)
+
+		#evaluation(prms,data, model = trained_model)
+		evaluation(prms,data, name = name)
+
+		#df = pd.DataFrame(data={"train_loss": l['train'], "train_acc": a['train'], "val_loss": l['val'], "val_acc": a['val']})
+		#df.to_csv("./saved_data/"+name+".csv", sep=',',index=False)
 
 	
 

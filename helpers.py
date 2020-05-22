@@ -18,19 +18,16 @@ def get_class_distribution(dataset_obj,idx2class):
 	return count_dict
 
 
-def plot_from_dict(dict_obj, plot_title, **kwargs):
-	return sns.barplot(data = pd.DataFrame.from_dict([dict_obj]).melt(), x = "variable", y="value", hue="variable", **kwargs).set_title(plot_title)
-
 def plot_from_dict2(train_dataset,test_dataset,idx2class,  **kwargs):
 	plt.figure(figsize=(10,15))
 
 	plt.subplot(2, 1, 1)
 	dict_obj = get_class_distribution(train_dataset,idx2class)
-	sns.barplot(data = pd.DataFrame.from_dict([dict_obj]).melt(), x = "variable", y="value", hue="variable", **kwargs).set_title('Entire Dataset (TRAINING)')
+	sns.barplot(data = pd.DataFrame.from_dict([dict_obj]).melt(), x = "variable", y="value", **kwargs).set_title('Entire Dataset (TRAINING)')
 
 	plt.subplot(2, 1, 2)
 	dict_obj = get_class_distribution(test_dataset,idx2class)
-	sns.barplot(data = pd.DataFrame.from_dict([dict_obj]).melt(), x = "variable", y="value", hue="variable", **kwargs).set_title('Entire Dataset (TEST)')
+	sns.barplot(data = pd.DataFrame.from_dict([dict_obj]).melt(), x = "variable", y="value", **kwargs).set_title('Entire Dataset (TEST)')
 
 	plt.show()
 

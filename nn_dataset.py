@@ -43,6 +43,7 @@ class Data():
 
 		if plot_dist:
 			print("--plotting distribution")
+			a = []
 			self.plot_dist(self.set_train, self.set_test, idx2class)
 		else:
 			print("--no plotting distribution")
@@ -50,6 +51,8 @@ class Data():
 
 		print("\n",self.set_train)
 		print("\n",self.set_test)
+
+
 
 
 
